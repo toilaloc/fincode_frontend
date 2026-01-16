@@ -1,0 +1,50 @@
+# Node dependencies
+node_modules/
+
+# Vite / build output
+dist/
+/.vite
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+/.idea/
+*.sublime-workspace
+
+# TypeScript cache
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.tsbuildinfo
+
+# Build output from TypeScript
+/dist
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+docker-compose.*.local.yml
+**/docker-compose.override.yml
+
+# npm pack
+/*.tgz
+
+# Storybook
+/.out
+
+# Misc
+*.local
