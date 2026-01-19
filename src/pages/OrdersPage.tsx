@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import RefundModal from '../components/RefundModal';
 
 interface Payment {
   id: number;
+  access_id: string; // Added for SDK operations
+  public_key: string; // Added for SDK operations
   fincode_order_id: string;
   amount: number;
-  status: 'pending' | 'authorized' | 'captured' | 'failed' | 'cancelled';
+  status: 'pending' | 'authorized' | 'captured' | 'failed' | 'cancelled' | 'partially_refunded' | 'refunded';
+  refundable_amount?: number; // Added from backend update
   authorized_at: string | null;
   captured_at: string | null;
   created_at: string;
@@ -35,6 +39,10 @@ const OrdersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cancellingPaymentId, setCancellingPaymentId] = useState<number | null>(null);
+
+  // Refund state
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [selectedPaymentForRefund, setSelectedPaymentForRefund] = useState<Payment | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -88,6 +96,20 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  const handleOpenRefundModal = (payment: Payment) => {
+    setSelectedPaymentForRefund(payment);
+    setShowRefundModal(true);
+  };
+
+  const handleRefundSuccess = () => {
+    // Refresh the list to show updated status and amounts
+    if (id) {
+      fetchPaymentDetail();
+    } else {
+      fetchPayments();
+    }
+    // Alternatively, we could update the local state optimistically or with the response data
+  };
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -95,12 +117,20 @@ const OrdersPage: React.FC = () => {
       case 'captured': return 'bg-green-100 text-green-800';
       case 'failed': return 'bg-red-100 text-red-800';
       case 'cancelled': return 'bg-gray-100 text-gray-800';
+      case 'partially_refunded': return 'bg-orange-100 text-orange-800';
+      case 'refunded': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const canCancelPayment = (status: string) => {
     return ['pending', 'authorized'].includes(status);
+  };
+
+  const canRefundPayment = (status: string) => {
+    // Backend rule: Only captured or partially_refunded payments can be refunded
+    // And amount must be > 0 (handled by refundableAmount check usually, but status check is primary)
+    return ['captured', 'partially_refunded'].includes(status);
   };
 
   if (loading) {
@@ -223,6 +253,16 @@ const OrdersPage: React.FC = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Refund Actions */}
+                  {canRefundPayment(payment.status) && (
+                    <button
+                      onClick={() => handleOpenRefundModal(payment)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    >
+                      Refund
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -241,6 +281,15 @@ const OrdersPage: React.FC = () => {
           </div>
         )}
       </div>
+      {selectedPaymentForRefund && (
+        <RefundModal
+          isOpen={showRefundModal}
+          onClose={() => setShowRefundModal(false)}
+          fincodeOrderId={selectedPaymentForRefund.fincode_order_id}
+          refundableAmount={selectedPaymentForRefund.refundable_amount ?? selectedPaymentForRefund.amount}
+          onSuccess={handleRefundSuccess}
+        />
+      )}
     </div>
   );
 };

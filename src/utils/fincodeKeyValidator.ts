@@ -45,6 +45,10 @@ export const fincodeKeyValidator = {
    */
   validatePublicKey: (key: string, context: string = 'Fincode operation'): void => {
     if (!fincodeKeyValidator.isValidPublicKey(key)) {
+      if (!key || typeof key !== 'string') {
+        throw new Error(`Invalid public key provided for ${context}. Key is missing or not a string.`);
+      }
+
       let errorMessage = `Invalid public key provided for ${context}. `;
 
       if (key.includes('c18') || key.includes('s_')) {

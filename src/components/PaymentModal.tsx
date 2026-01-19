@@ -5,7 +5,7 @@ import api from '../utils/api';
 import { fincodeKeyValidator } from '../utils/fincodeKeyValidator';
 
 // Types
-type PaymentStep = 'review' | 'payment' | 'processing' | 'success';
+type PaymentStep = 'review' | 'payment' | 'processing' | 'confirmed' | 'success';
 
 interface Product {
   id: number;
@@ -73,12 +73,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const formatExpiry = useCallback((value: string): string => {
     const digits = value.replace(/\D/g, '').substring(0, 4);
-    if (digits.length >= 2) {
-      const month = digits.substring(0, 2).padStart(2, '0');
-      const year = digits.substring(2, 2).padStart(2, '0');
-      return `${month}/${year}`.substring(0, 5);
+    if (digits.length <= 2) {
+      return digits;
+    } else {
+      const month = digits.substring(0, 2);
+      const year = digits.substring(2, 4);
+      return `${month}/${year}`;
     }
-    return digits;
   }, []);
 
   const formatCvv = useCallback((value: string): string => {
@@ -147,7 +148,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       // STEP 1: Tokenize card
       const cardData = {
         card_no: formData.cardNumber.replace(/\s/g, ''),
-        expire: formData.expiry.replace('/', '').substr(2, 2) + formData.expiry.replace('/', '').substr(0, 2),
+        expire: formData.expiry.replace('/', '').substr(2, 4) + formData.expiry.replace('/', '').substr(0, 2),
         holder_name: formData.holderName,
         security_code: formData.cvv,
       };
@@ -186,7 +187,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             method: '1',
             // Include card details as required by FinCode
             card_no: formData.cardNumber.replace(/\s/g, ''),
-            expire: formData.expiry.replace('/', '').substr(2, 2) + formData.expiry.replace('/', '').substr(0, 2),
+            expire: formData.expiry.replace('/', '').substr(2, 4) + formData.expiry.replace('/', '').substr(0, 2),
             holder_name: formData.holderName,
             security_code: formData.cvv,
           },
@@ -210,11 +211,28 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       console.log('Payment authorized:', executeResult);
 
-      // STEP 3: Capture payment
+      setStep('confirmed');
+
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.response?.data?.error || err.message || 'Payment failed');
+      setStep('payment');
+    } finally {
+      setLoading(false);
+    }
+  }, [paymentData, formData, navigate]);
+
+  const handleCapture = useCallback(async () => {
+    if (!paymentData) return;
+    
+    setLoading(true);
+    setError('');
+
+    try {
       const captureResponse = await api.post(
         `/api/v1/payments/${paymentData.order_id}/capture`,
         {
-          transaction_id: (executeResult as any).id || paymentData.order_id
+          transaction_id: paymentData.order_id
         }
       );
 
@@ -226,15 +244,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       setStep('success');
       navigate(`/success/${paymentData.order_id}`);
-
     } catch (err: any) {
-      console.error('Payment error:', err);
-      setError(err.response?.data?.error || err.message || 'Payment failed');
-      setStep('payment');
+      console.error('Capture error:', err);
+      setError(err.response?.data?.error || err.message || 'Capture failed');
+      setStep('confirmed');
     } finally {
       setLoading(false);
     }
-  }, [paymentData, formData, navigate]);
+  }, [paymentData, navigate]);
 
   const renderContent = () => {
     switch (step) {
@@ -420,6 +437,56 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Processing Payment...</h2>
             <p className="text-gray-600">Please wait while we process your payment.</p>
+          </div>
+        );
+
+      case 'confirmed':
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Confirm Payment</h2>
+            
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-blue-700">Order ID:</span>
+                <span className="text-sm font-mono text-blue-900">{paymentData?.order_id}</span>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm font-medium text-blue-700">Total:</span>
+                <span className="text-lg font-bold text-blue-900">¥{paymentData?.amount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <p className="text-gray-600 mb-6 text-center">Your payment has been authorized. Click below to complete the transaction.</p>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+                {error}
+              </div>
+            )}
+
+            <div className="flex space-x-4">
+              <button
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCapture} 
+                disabled={loading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  'Complete Payment'
+                )}
+              </button>
+            </div>
           </div>
         );
 
