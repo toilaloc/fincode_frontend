@@ -136,7 +136,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const handlePayment = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!paymentData) return;
-    
+
     setLoading(true);
     setStep('processing');
     setError('');
@@ -162,9 +162,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               resolve(response.id);
             } else {
               const errorMessage = response.errors?.[0]?.message ||
-                                 response.errors?.[0]?.error_message ||
-                                 response.message ||
-                                 'Tokenization failed';
+                response.errors?.[0]?.error_message ||
+                response.message ||
+                'Tokenization failed';
               reject(new Error(errorMessage));
             }
           },
@@ -197,9 +197,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               resolve(response);
             } else {
               const errorMessage = response.errors?.[0]?.message ||
-                                 response.errors?.[0]?.error_message ||
-                                 response.message ||
-                                 'Execute failed';
+                response.errors?.[0]?.error_message ||
+                response.message ||
+                'Execute failed';
               reject(new Error(errorMessage));
             }
           },
@@ -224,7 +224,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const handleCapture = useCallback(async () => {
     if (!paymentData) return;
-    
+
     setLoading(true);
     setError('');
 
@@ -259,7 +259,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Review Your Order</h2>
-            
+
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -271,7 +271,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   <p className="text-gray-600">Quantity: {quantity}</p>
                 </div>
               </div>
-              
+
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-medium text-gray-700">Total Amount:</span>
@@ -294,8 +294,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleConfirmOrder} 
+              <button
+                onClick={handleConfirmOrder}
                 disabled={loading}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50"
               >
@@ -305,7 +305,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     Processing...
                   </div>
                 ) : (
-                  'Confirm & Pay'
+                  'Proceed to Payment'
                 )}
               </button>
             </div>
@@ -316,7 +316,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Payment Details</h2>
-            
+
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-blue-700">Order ID:</span>
@@ -444,7 +444,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Confirm Payment</h2>
-            
+
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-blue-700">Order ID:</span>
@@ -472,8 +472,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleCapture} 
+              <button
+                onClick={handleCapture}
                 disabled={loading}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50"
               >
@@ -483,7 +483,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     Processing...
                   </div>
                 ) : (
-                  'Complete Payment'
+                  'Purchase Order'
                 )}
               </button>
             </div>
