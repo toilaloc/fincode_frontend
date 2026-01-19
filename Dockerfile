@@ -16,7 +16,7 @@ COPY . .
 EXPOSE 5173
 
 # Development command
-CMD ["sh", "-c", "if [ ! -f package.json ]; then echo 'Generating React app...'; npm create vite@latest . --template react-ts && npm install; fi && echo 'Starting development server...' && npm run dev -- --host 0.0.0.0 --port 5173"]
+CMD ["sh", "-c", "if [ ! -f package.json ]; then echo 'Generating React app...'; npm create vite@latest . --template react-ts && npm install; fi && echo 'Starting development server...' && npm run dev"]
 
 
 # Production Dockerfile - Multi-stage build

@@ -211,7 +211,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       console.log('Payment authorized:', executeResult);
 
-      setStep('confirmed');
+      // Confirm payment on backend
+      try {
+        await api.put(`/api/v1/payments/${paymentData.order_id}/confirm`, {});
+        console.log('Payment confirmed on backend');
+        setStep('confirmed');
+      } catch (confirmError) {
+        console.error('Failed to confirm payment on backend:', confirmError);
+        // Still proceed to confirmed step or handle error? 
+        // Assuming we should show error but maybe allow retry or manual capture?
+        // For now, let's treat it as a blocking error
+        throw confirmError;
+      }
 
     } catch (err: any) {
       console.error('Payment error:', err);

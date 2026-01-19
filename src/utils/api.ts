@@ -2,7 +2,7 @@ import axios from 'axios';
 import { authUtils } from './auth';
 
 // Configure axios defaults
-axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.baseURL = 'http://localhost:3005';
 
 // Add request interceptor to include Bearer token
 axios.interceptors.request.use(

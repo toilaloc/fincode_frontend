@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
       target: development
     ports:
-      - "3001:5173"
+      - "3006:3006"
     volumes:
       # Sync generated files back to host
       - .:/app
@@ -16,7 +16,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
-      - VITE_PORT=5173
+      - VITE_PORT=3006
     stdin_open: true
     tty: true
     restart: unless-stopped
