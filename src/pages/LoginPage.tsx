@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
 
       // Redirect after a short delay
       setTimeout(() => {
-        const returnTo = searchParams.get('returnTo') || '/products/1';
+        const returnTo = searchParams.get('returnTo') || '/';
         navigate(returnTo);
       }, 2000);
 

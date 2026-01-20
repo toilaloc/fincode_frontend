@@ -40,7 +40,7 @@ const VerifyPage: React.FC = () => {
 
       // Redirect to home after successful verification
       setTimeout(() => {
-        navigate('/products/1');
+        navigate('/');
       }, 2000);
 
     } catch (err: any) {
@@ -97,7 +97,7 @@ const VerifyPage: React.FC = () => {
                   </button>
                 )}
                 <button
-                  onClick={() => navigate('/products/1')}
+                  onClick={() => navigate('/')}
                   className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors duration-200"
                 >
                   Go to Home
